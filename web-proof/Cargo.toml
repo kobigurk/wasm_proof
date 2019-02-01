@@ -1,0 +1,25 @@
+[package]
+name = "web-proof"
+version = "0.1.0"
+authors = ["Kobi Gurkan <kobigurk@gmail.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+sapling-crypto = { path = "../sapling-crypto" }
+pairing = { path = "../pairing" }
+ff = { path = "../ff" }
+rand = "0.4"
+hex = "0.3.2"
+serde = "1.0.80"
+serde_derive = "1.0.80"
+serde_json = "1.0.33"
+
+[dependencies.bellman]
+path = "../bellman"
+
+[dependencies.wasm-bindgen]
+version = "0.2"
+features = ["serde-serialize"]

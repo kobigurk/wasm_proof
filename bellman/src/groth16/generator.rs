@@ -4,11 +4,14 @@ use std::sync::Arc;
 
 use pairing::{
     Engine,
-    PrimeField,
-    Field,
     Wnaf,
     CurveProjective,
     CurveAffine
+};
+
+use ff::{
+    Field,
+    PrimeField,
 };
 
 use super::{

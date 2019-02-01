@@ -2,6 +2,9 @@ use pairing::{
     Engine,
     CurveProjective,
     CurveAffine,
+};
+
+use ff::{
     PrimeField
 };
 

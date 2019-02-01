@@ -1,10 +1,12 @@
 use pairing::{
     CurveAffine,
     CurveProjective,
-    Engine,
-    PrimeField,
+};
+use ff::{
     Field,
-    PrimeFieldRepr
+    PrimeField,
+    PrimeFieldRepr,
+    ScalarEngine,
 };
 use std::sync::Arc;
 use std::io;
@@ -141,7 +143,7 @@ fn multiexp_inner<Q, D, G, S>(
     pool: &Worker,
     bases: S,
     density_map: D,
-    exponents: Arc<Vec<<<G::Engine as Engine>::Fr as PrimeField>::Repr>>,
+    exponents: Arc<Vec<<<G::Engine as ScalarEngine>::Fr as PrimeField>::Repr>>,
     mut skip: u32,
     c: u32,
     handle_trivial: bool
@@ -167,8 +169,8 @@ fn multiexp_inner<Q, D, G, S>(
             // Create space for the buckets
             let mut buckets = vec![<G as CurveAffine>::Projective::zero(); (1 << c) - 1];
 
-            let zero = <G::Engine as Engine>::Fr::zero().into_repr();
-            let one = <G::Engine as Engine>::Fr::one().into_repr();
+            let zero = <G::Engine as ScalarEngine>::Fr::zero().into_repr();
+            let one = <G::Engine as ScalarEngine>::Fr::one().into_repr();
 
             // Sort the bases into buckets
             for (&exp, density) in exponents.iter().zip(density_map.as_ref().iter()) {
@@ -211,7 +213,7 @@ fn multiexp_inner<Q, D, G, S>(
 
     skip += c;
 
-    if skip >= <G::Engine as Engine>::Fr::NUM_BITS {
+    if skip >= <G::Engine as ScalarEngine>::Fr::NUM_BITS {
         // There isn't another region.
         Box::new(this)
     } else {
@@ -238,7 +240,7 @@ pub fn multiexp<Q, D, G, S>(
     pool: &Worker,
     bases: S,
     density_map: D,
-    exponents: Arc<Vec<<<G::Engine as Engine>::Fr as PrimeField>::Repr>>
+    exponents: Arc<Vec<<<G::Engine as ScalarEngine>::Fr as PrimeField>::Repr>>
 ) -> Box<Future<Item=<G as CurveAffine>::Projective, Error=SynthesisError>>
     where for<'a> &'a Q: QueryDensity,
           D: Send + Sync + 'static + Clone + AsRef<Q>,
@@ -285,7 +287,7 @@ fn test_with_bls12() {
     const SAMPLES: usize = 1 << 14;
 
     let rng = &mut rand::thread_rng();
-    let v = Arc::new((0..SAMPLES).map(|_| <Bls12 as Engine>::Fr::rand(rng).into_repr()).collect::<Vec<_>>());
+    let v = Arc::new((0..SAMPLES).map(|_| <Bls12 as ScalarEngine>::Fr::rand(rng).into_repr()).collect::<Vec<_>>());
     let g = Arc::new((0..SAMPLES).map(|_| <Bls12 as Engine>::G1::rand(rng).into_affine()).collect::<Vec<_>>());
 
     let naive = naive_multiexp(g.clone(), v.clone());

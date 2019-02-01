@@ -12,9 +12,12 @@
 
 use pairing::{
     Engine,
-    Field,
-    PrimeField,
     CurveProjective
+};
+
+use ff::{
+    PrimeField,
+    Field
 };
 
 use super::{
