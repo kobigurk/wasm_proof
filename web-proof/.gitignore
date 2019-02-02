@@ -1,3 +1,4 @@
 target
 web/web_proof*
 web/node_modules
+web/dist

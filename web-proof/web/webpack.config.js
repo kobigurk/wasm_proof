@@ -1,8 +1,9 @@
 // webpack.config.js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const prod = process.env.NODE_ENV === 'production';
 
-module.exports = {
+const browserConfig = {
   entry: "./index.js",
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -14,5 +15,17 @@ module.exports = {
       template: 'template.html'
     })
   ],
-  mode: "development"
+	mode: prod ? 'production' : 'development'
 };
+
+const workerConfig = {
+  entry: "./worker.js",
+  target: 'webworker',
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "worker.js",
+  },
+	mode: prod ? 'production' : 'development'
+};
+
+module.exports = [browserConfig, workerConfig];
