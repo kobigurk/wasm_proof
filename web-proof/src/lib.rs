@@ -16,8 +16,22 @@ use bellman::{
 };
 
 use rand::{XorShiftRng, SeedableRng};
-use ff::{Field, PrimeField};
-use pairing::{Engine, bls12_381::{Bls12, Fr, FrRepr}};
+use ff::{BitIterator, PrimeField};
+use pairing::{bn256::{Bn256, Fr}};
+use sapling_crypto::{
+    babyjubjub::{
+        fs::Fs,
+        JubjubBn256,
+        FixedGenerators,
+        JubjubEngine,
+        JubjubParams,
+        edwards::Point
+    },
+    circuit::{
+        baby_ecc::fixed_base_multiplication,
+        boolean::{AllocatedBit, Boolean}
+    }
+};
 
 #[wasm_bindgen]
 extern "C" {
@@ -26,33 +40,44 @@ extern "C" {
     fn log(s: &str);
 }
 
-struct MySillyCircuit<E: Engine> {
-    a: Option<E::Fr>,
-    b: Option<E::Fr>
+struct DiscreteLogCircuit<'a, E: JubjubEngine> {
+    pub params: &'a E::Params,
+    pub x: Option<E::Fr>,
 }
 
-impl<E: Engine> Circuit<E> for MySillyCircuit<E> {
+impl<'a, E: JubjubEngine> Circuit<E> for DiscreteLogCircuit<'a, E> {
     fn synthesize<CS: ConstraintSystem<E>>(
         self,
         cs: &mut CS
     ) -> Result<(), SynthesisError>
     {
-        let a = cs.alloc(|| "a", || self.a.ok_or(SynthesisError::AssignmentMissing))?;
-        let b = cs.alloc(|| "b", || self.b.ok_or(SynthesisError::AssignmentMissing))?;
-        let c = cs.alloc_input(|| "c", || {
-            let mut a = self.a.ok_or(SynthesisError::AssignmentMissing)?;
-            let b = self.b.ok_or(SynthesisError::AssignmentMissing)?;
+        let mut x_bits = match self.x {
+            Some(x) => {
+                BitIterator::new(x.into_repr()).collect::<Vec<_>>()
+            }
+            None => {
+                vec![false; Fs::NUM_BITS as usize]
+            }
+        };
 
-            a.mul_assign(&b);
-            Ok(a)
-        })?;
+        x_bits.reverse();
+        x_bits.truncate(Fs::NUM_BITS as usize);
 
-        cs.enforce(
-            || "a*b=c",
-            |lc| lc + a,
-            |lc| lc + b,
-            |lc| lc + c
-        );
+        let x_bits = x_bits.into_iter()
+                           .enumerate()
+                           .map(|(i, b)| AllocatedBit::alloc(cs.namespace(|| format!("scalar bit {}", i)), Some(b)).unwrap())
+                           .map(|v| Boolean::from(v))
+                           .collect::<Vec<_>>();
+
+
+        let h = fixed_base_multiplication(
+            cs.namespace(|| "multiplication"),
+            FixedGenerators::ProofGenerationKey,
+            &x_bits,
+            self.params
+        ).unwrap();
+
+        h.inputize(cs).unwrap();
 
         Ok(())
     }
@@ -65,7 +90,8 @@ pub struct KGGenerate {
 
 #[derive(Serialize)]
 pub struct KGProof {
-    pub proof: String
+    pub proof: String,
+    pub h: String
 }
 
 #[derive(Serialize)]
@@ -77,15 +103,18 @@ pub struct KGVerify {
 pub fn generate() -> JsValue {
     let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
 
-    let params = generate_random_parameters::<Bls12, _, _>(
-        MySillyCircuit { a: None, b: None },
+    let j_params = &JubjubBn256::new();
+    let params = generate_random_parameters::<Bn256, _, _>(
+        DiscreteLogCircuit {
+            params: j_params,
+            x: None
+        },
         rng
     ).unwrap();
 
     let mut v = vec![];
 
     params.write(&mut v).unwrap();
-    assert_eq!(v.len(), 2136);
 
     JsValue::from_serde(&KGGenerate {
         params: hex::encode(&v[..])
@@ -93,19 +122,23 @@ pub fn generate() -> JsValue {
 }
 
 #[wasm_bindgen]
-pub fn prove(params: &str, a_raw: u32, b_raw: u32) -> JsValue {
-    let de_params = Parameters::<Bls12>::read(&hex::decode(params).unwrap()[..], true).unwrap();
-
-    let a = Fr::from_repr(FrRepr::from(a_raw as u64)).unwrap();
-    let b = Fr::from_repr(FrRepr::from(b_raw as u64)).unwrap();
-    let mut c = a;
-    c.mul_assign(&b);
+pub fn prove(params: &str, x_raw: &str) -> JsValue {
+    let de_params = Parameters::<Bn256>::read(&hex::decode(params).unwrap()[..], true).unwrap();
 
     let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
+    let params = &JubjubBn256::new();
+
+    let g = params.generator(FixedGenerators::ProofGenerationKey);
+    let x = Fr::from_str(x_raw).unwrap();
+
+    let xs = Fs::from_str(x_raw).unwrap();
+
+    let h = g.mul(xs, params);
+
     let proof = create_random_proof(
-        MySillyCircuit {
-            a: Some(a),
-            b: Some(b)
+        DiscreteLogCircuit {
+            params: params,
+            x: Some(x),
         },
         &de_params,
         rng
@@ -114,16 +147,29 @@ pub fn prove(params: &str, a_raw: u32, b_raw: u32) -> JsValue {
     let mut v = vec![];
     proof.write(&mut v).unwrap();
 
+    let mut v2 = vec![];
+    h.write(&mut v2).unwrap();
+
     JsValue::from_serde(&KGProof {
-        proof: hex::encode(&v[..])
+        proof: hex::encode(&v[..]),
+        h: hex::encode(&v2[..])
     }).unwrap()
 }
 
 #[wasm_bindgen]
-pub fn verify(params: &str, proof: &str, c: u32) -> JsValue {
+pub fn verify(params: &str, proof: &str, h: &str) -> JsValue {
+    let j_params = &JubjubBn256::new();
     let de_params = Parameters::read(&hex::decode(params).unwrap()[..], true).unwrap();
-    let pvk = prepare_verifying_key::<Bls12>(&de_params.vk);
-    let result = verify_proof(&pvk, &Proof::read(&hex::decode(proof).unwrap()[..]).unwrap(), &[Fr::from_repr(FrRepr::from(c as u64)).unwrap()]).unwrap();
+    let pvk = prepare_verifying_key::<Bn256>(&de_params.vk);
+    let h = Point::<Bn256, _>::read(&hex::decode(h).unwrap()[..], j_params).unwrap();
+    let (h_x, h_y) = h.into_xy();
+    let result = verify_proof(
+        &pvk,
+        &Proof::read(&hex::decode(proof).unwrap()[..]).unwrap(),
+        &[
+        h_x,
+        h_y
+        ]).unwrap();
 
     JsValue::from_serde(&KGVerify{
         result: result

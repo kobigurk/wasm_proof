@@ -10,7 +10,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "Getting started with WASM"
+      title: "Getting started with WASM",
+      template: 'template.html'
     })
   ],
   mode: "development"

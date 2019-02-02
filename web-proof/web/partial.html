@@ -1,0 +1,195 @@
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <!-- Title -->
+      <span class="mdl-layout-title">ZKP in WebAssembly</span>
+    </div>
+  </header>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <script>
+    function run_generate() {
+      try {
+        var gen = js.generate();
+        $('#tr_params').show();
+        $('#td_params').text(gen.params);
+        $('#div_prove_params').addClass('is-dirty');
+        $('#txt_prove_params').val(gen.params);
+        $('#div_verify_params').addClass('is-dirty');
+        $('#txt_verify_params').val(gen.params);
+        $('#tr_generate_error').hide();
+      } catch(e) {
+        $('#tr_params').hide();
+        $('#td_params').text('');
+        $('#tr_generate_error').show();
+        $('#td_generate_error').text(e.message);
+      }
+      $('#table_generate').show();
+    }
+    function run_prove() {
+      try {
+        var p = js.prove($('#txt_prove_params').val(),$('#txt_prove_x').val() );
+        $('#tr_h').show();
+        $('#tr_proof').show();
+        $('#td_h').text(p.h);
+        $('#td_proof').text(p.proof);
+        $('#div_verify_proof').addClass('is-dirty');
+        $('#txt_verify_proof').val(p.proof);
+        $('#div_verify_h').addClass('is-dirty');
+        $('#txt_verify_h').val(p.h);
+        $('#tr_prove_error').hide();
+      } catch(e) {
+        $('#tr_h').hide();
+        $('#td_h').text('');
+        $('#tr_proof').hide();
+        $('#td_proof').text('');
+        $('#tr_prove_error').show();
+        $('#td_prove_error').text(e.message);
+      }
+      $('#table_prove').show();
+    }
+    function run_verify() {
+      try {
+        var v = js.verify($('#txt_verify_params').val(),$('#txt_verify_proof').val(),$('#txt_verify_h').val() );
+        $('#tr_result').show();
+        $('#td_result').text(v.result);
+        $('#tr_verify_error').hide();
+      } catch(e) {
+        $('#tr_result').hide();
+        $('#td_result').text('');
+        $('#tr_verify_error').show();
+        $('#td_verify_error').text(e.message);
+      }
+      $('#table_verify').show();
+    }
+  </script>
+  <main class="mdl-layout__content">
+    <div class="page-content">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--6-col">
+          <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text">Generate keys</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              Generate proving and verification keys for a knowledge pf discrete logarithm problem. That is, the knowledge of <b>x</b> such that <b>h = g^x</b>, for a constant <b>g</b>.
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_generate()">
+                Generate
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="mdl-cell mdl-cell--6-col">
+          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none;" id="table_generate">
+            <tbody>
+              <tr id="tr_params">
+                <td class="mdl-data-table__cell--non-numeric">Params</td>
+                <td id="td_params" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;"></td>
+              </tr>
+              <tr id="tr_generate_error">
+                <td class="mdl-data-table__cell--non-numeric">Error</td>
+                <td id="td_generate_error"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--6-col">
+          <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text">Prove knowledge</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              Prove knowledge of <b>x</b>, compute a proof string and <b>h</b>.
+              <form action="#">
+                <div class="mdl-textfield mdl-js-textfield" id="div_prove_params">
+                  <input class="mdl-textfield__input" type="text" id="txt_prove_params">
+                  <label class="mdl-textfield__label" for="txt_prove_params">Enter <b>params</b>...</label>
+                </div>
+
+                <div class="mdl-textfield mdl-js-textfield">
+                  <input class="mdl-textfield__input" type="text" id="txt_prove_x">
+                  <label class="mdl-textfield__label" for="txt_prove_x">Enter <b>x</b>...</label>
+                </div>
+              </form>
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_prove()">
+                Prove
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="mdl-cell mdl-cell--6-col">
+          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none" id="table_prove">
+            <tbody>
+              <tr id="tr_h">
+                <td class="mdl-data-table__cell--non-numeric">h</td>
+                <td id="td_h"></td>
+              </tr>
+              <tr id="tr_proof">
+                <td class="mdl-data-table__cell--non-numeric">Proof</td>
+                <td id="td_proof" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;"></td>
+              </tr>
+              <tr id="tr_prove_error">
+                <td class="mdl-data-table__cell--non-numeric">Error</td>
+                <td id="td_prove_error"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--6-col">
+          <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text">Verify</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              Given a proof and <b>h</b>, verify their validity.
+              <form action="#">
+                <div class="mdl-textfield mdl-js-textfield" id="div_verify_params">
+                  <input class="mdl-textfield__input" type="text" id="txt_verify_params">
+                  <label class="mdl-textfield__label" for="txt_verify_params">Enter <b>params</b>...</label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield" id="div_verify_proof">
+                  <input class="mdl-textfield__input" type="text" id="txt_verify_proof">
+                  <label class="mdl-textfield__label" for="txt_verify_proof">Enter <b>proof</b>...</label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield" id="div_verify_h">
+                  <input class="mdl-textfield__input" type="text" id="txt_verify_h">
+                  <label class="mdl-textfield__label" for="txt_verify_h">Enter <b>h</b>...</label>
+                </div>
+              </form>
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_verify()">
+                Verify
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="mdl-cell mdl-cell--6-col">
+          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none" id="table_verify">
+            <tbody>
+              <tr id="tr_result">
+                <td class="mdl-data-table__cell--non-numeric">Result</td>
+                <td id="td_result"></td>
+              </tr>
+              <tr id="tr_verify_error">
+                <td class="mdl-data-table__cell--non-numeric">Error</td>
+                <td id="td_verify_error"></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
