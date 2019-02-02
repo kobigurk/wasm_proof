@@ -62,7 +62,7 @@ let eventHandler = function(event) {
         window.params = gen.params;
         $('#tr_params').show();
         $('#btn_save_to_file').show();
-        $('#td_params').text('Saved in memory, size: ' + gen.params.length);
+        $('#td_params').text('Generated, size: ' + gen.params.length);
         $('#div_prove_params').addClass('is-dirty');
         $('#txt_prove_params').val('Loaded from memory');
         $('#div_verify_params').addClass('is-dirty');
