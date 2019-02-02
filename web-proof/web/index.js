@@ -45,6 +45,8 @@ window.run_verify = run_verify;
 
 let eventHandler = function(event) {
     switch (event.data.type) {
+      case 'wasm_loaded':
+        $('.spinner_wasm').hide();
       case 'generate':
       $('#spinner_generate').hide();
       if (event.data.error) {

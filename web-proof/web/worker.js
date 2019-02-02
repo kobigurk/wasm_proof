@@ -2,10 +2,14 @@ let js;
 
 import("./web_proof").then(loaded => {
   js = loaded;
+  postMessage({type: 'wasm_loaded'});
 });
 
 onmessage = event => {
   try {
+    if (!js) {
+      throw new Error('Wasm module not loaded yet.');
+    }
     switch (event.data.type) {
       case 'generate':
         var seed = new Uint32Array(4);
