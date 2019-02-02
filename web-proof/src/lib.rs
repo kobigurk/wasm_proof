@@ -100,8 +100,10 @@ pub struct KGVerify {
 }
 
 #[wasm_bindgen]
-pub fn generate() -> JsValue {
-    let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
+pub fn generate(seed_slice: &[u32]) -> JsValue {
+    let mut seed : [u32; 4] = [0; 4];
+    seed.copy_from_slice(seed_slice);
+    let rng = &mut XorShiftRng::from_seed(seed);
 
     let j_params = &JubjubBn256::new();
     let params = generate_random_parameters::<Bn256, _, _>(
@@ -122,10 +124,12 @@ pub fn generate() -> JsValue {
 }
 
 #[wasm_bindgen]
-pub fn prove(params: &str, x_raw: &str) -> JsValue {
+pub fn prove(seed_slice: &[u32], params: &str, x_raw: &str) -> JsValue {
     let de_params = Parameters::<Bn256>::read(&hex::decode(params).unwrap()[..], true).unwrap();
 
-    let rng = &mut XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
+    let mut seed : [u32; 4] = [0; 4];
+    seed.copy_from_slice(seed_slice);
+    let rng = &mut XorShiftRng::from_seed(seed);
     let params = &JubjubBn256::new();
 
     let g = params.generator(FixedGenerators::ProofGenerationKey);

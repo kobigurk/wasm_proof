@@ -8,11 +8,16 @@ onmessage = event => {
   try {
     switch (event.data.type) {
       case 'generate':
-        var gen = js.generate();
+        var seed = new Uint32Array(4);
+        self.crypto.getRandomValues(seed);
+
+        var gen = js.generate(seed);
         postMessage({type: event.data.type, result: gen});
         break;
       case 'prove':
-        var p = js.prove(event.data.params, event.data.x);
+        var seed = new Uint32Array(4);
+        self.crypto.getRandomValues(seed);
+        var p = js.prove(seed, event.data.params, event.data.x);
         postMessage({type: event.data.type, result: p});
         break;
       case 'verify':
