@@ -179,3 +179,10 @@ pub fn verify(params: &str, proof: &str, h: &str) -> JsValue {
         result: result
     }).unwrap()
 }
+
+#[test]
+fn print_g() {
+    let j_params = &JubjubBn256::new();
+    let g = j_params.generator(FixedGenerators::ProofGenerationKey);
+    println!("{}, {}", g.into_xy().0, g.into_xy().1);
+}
