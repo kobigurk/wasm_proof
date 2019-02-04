@@ -11,7 +11,7 @@ const browserConfig = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "Getting started with WASM",
+      title: "ZKP in WebAssembly",
       template: 'template.html'
     })
   ],
