@@ -30,7 +30,7 @@ onmessage = event => {
         break;
     }
   } catch(e) {
-    postMessage({type: event.data.type, error: e.message});
+    postMessage({type: event.data.type, error: e});
   }
 };
 
