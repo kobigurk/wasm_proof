@@ -6,7 +6,7 @@ const prod = process.env.NODE_ENV === 'production';
 const browserConfig = {
   entry: "./index.js",
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "..", "..", "docs"),
     filename: "index.js",
   },
   plugins: [
@@ -22,7 +22,7 @@ const workerConfig = {
   entry: "./worker.js",
   target: 'webworker',
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "..", "..", "docs"),
     filename: "worker.js",
   },
 	mode: prod ? 'production' : 'development'
