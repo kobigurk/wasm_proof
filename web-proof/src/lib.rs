@@ -213,9 +213,53 @@ fn convert_error_to_jsvalue(res: Result<JsValue, Box<Error>>) -> Result<JsValue,
     }
 }
 
-#[test]
-fn print_g() {
-    let j_params = &JubjubBn256::new();
-    let g = j_params.generator(FixedGenerators::ProofGenerationKey);
-    println!("{}, {}", g.into_xy().0, g.into_xy().1);
+
+#[cfg(test)]
+mod test {
+    use rand::{XorShiftRng, SeedableRng, Rng};
+    use pairing::{bn256::{Bn256, Fr}};
+    use sapling_crypto::{
+        babyjubjub::{
+            fs::Fs,
+            JubjubBn256,
+            FixedGenerators,
+            JubjubEngine,
+            JubjubParams,
+            edwards::Point
+        }
+    };
+    use sapling_crypto::circuit::boolean::{Boolean, AllocatedBit};
+    use sapling_crypto::circuit::test::TestConstraintSystem;
+    use bellman::{
+        Circuit,
+        SynthesisError,
+        ConstraintSystem,
+        groth16::{Proof, Parameters, verify_proof, create_random_proof, prepare_verifying_key, generate_random_parameters}
+    };
+
+    use super::DiscreteLogCircuit;
+
+    #[test]
+    fn print_g() {
+        let j_params = &JubjubBn256::new();
+        let g = j_params.generator(FixedGenerators::ProofGenerationKey);
+        println!("{}, {}", g.into_xy().0, g.into_xy().1);
+    }
+
+    #[test]
+    fn print_debug_info() {
+        let mut cs = TestConstraintSystem::<Bn256>::new();
+        let rng = &mut XorShiftRng::from_seed([0x3dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
+        let j_params = &JubjubBn256::new();
+
+        let dl = DiscreteLogCircuit {
+            params: j_params,
+            x: None,
+        };
+        dl.synthesize(&mut cs).unwrap();
+        println!("num constraints: {}", cs.num_constraints());
+        println!("num inputs: {}", cs.num_inputs());
+        println!("num aux: {}", cs.num_aux());
+    }
+
 }
