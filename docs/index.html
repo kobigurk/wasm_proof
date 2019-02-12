@@ -24,148 +24,316 @@
 
   <main class="mdl-layout__content">
     <div class="page-content">
-      <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--3-col"></div>
-        <div class="mdl-cell mdl-cell--6-col">
-          <a class="mdl-button mdl-js-button" style="width: 100%" target="_blank" href="https://github.com/kobigurk/wasm_proof">https://github.com/kobigurk/wasm_proof</a>
-        </div>
-        <div class="mdl-cell mdl-cell--3-col"></div>
-        <div class="mdl-cell mdl-cell--6-col">
-          <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
-            <div class="mdl-card__title">
-              <h2 class="mdl-card__title-text">Generate keys</h2>
-            </div>
-            <div class="mdl-card__supporting-text">
-              Generate proving and verification keys for proving the knowledge of an elliptic curve discrete logarithm problem. That is, the knowledge of <b>x</b> such that $h = g^x$, in the <b>baby jubjub</b> curve.
-              The curve is $168700 * x^2 + y^2 = 1 + 168696x^2y^2$, defined over the prime field $F_p$, where $$\small{p = 218882428718392752222464057452572750885 \atop 48364400416034343698204186575808495617}$$ and $$g = \\ \mathrm{0x06cdb238b2f9c9ff32dbcca964593c5 \atop 836ddd962a12a07bb6452a598d15d3ff4,} \\ \mathrm{0x18c6409592649c36a79a15177b4aec5 \atop 784075f5a03f9a1b09a57af4b288f929d}$$.
-            </div>
-            <div class="mdl-card__actions mdl-card--border">
-              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_generate()">
-                Generate
-              </a>
-              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_generate_load()">
-                Load from file
-              </a>
-              <input id="input_load_params" type="file" style="display: none" />
-              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_generate_save()" id="btn_save_to_file" style="display: none">
-                Save to file
-              </a>
-
-              <div id="spinner_generate" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
-            </div>
-          </div>
-        </div>
-        <div class="mdl-cell mdl-cell--6-col">
-          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none;" id="table_generate">
-            <tbody>
-              <tr id="tr_params" style="display; none">
-                <td class="mdl-data-table__cell--non-numeric">Params</td>
-                <td id="td_params" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
-                </td>
-              </tr>
-              <tr id="tr_generate_error">
-                <td class="mdl-data-table__cell--non-numeric">Error</td>
-                <td id="td_generate_error"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--6-col">
-          <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
-            <div class="mdl-card__title">
-              <h2 class="mdl-card__title-text">Prove knowledge</h2>
-            </div>
-            <div class="mdl-card__supporting-text">
-              Prove knowledge of <b>x</b>, compute a proof string and <b>h</b>.
-              <form action="#">
-                <div class="mdl-textfield mdl-js-textfield" id="div_prove_params">
-                  <input class="mdl-textfield__input" type="text" id="txt_prove_params" disabled>
-                  <label class="mdl-textfield__label" for="txt_prove_params">Enter <b>params</b>...</label>
-                </div>
-
-                <div class="mdl-textfield mdl-js-textfield">
-                  <input class="mdl-textfield__input" type="text" id="txt_prove_x">
-                  <label class="mdl-textfield__label" for="txt_prove_x">Enter <b>x</b> in hexadecimal...</label>
-                </div>
-              </form>
-            </div>
-            <div class="mdl-card__actions mdl-card--border">
-              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_prove()">
-                Prove
-              </a>
-              <div id="spinner_prove" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
-            </div>
-          </div>
-        </div>
-        <div class="mdl-cell mdl-cell--6-col">
-          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none" id="table_prove">
-            <tbody>
-              <tr id="tr_h">
-                <td class="mdl-data-table__cell--non-numeric">h</td>
-                <td id="td_h" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;"></td>
-              </tr>
-              <tr id="tr_proof">
-                <td class="mdl-data-table__cell--non-numeric">Proof</td>
-                <td id="td_proof" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;"></td>
-              </tr>
-              <tr id="tr_prove_error">
-                <td class="mdl-data-table__cell--non-numeric">Error</td>
-                <td id="td_prove_error" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--6-col">
-          <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
-            <div class="mdl-card__title">
-              <h2 class="mdl-card__title-text">Verify</h2>
-            </div>
-            <div class="mdl-card__supporting-text">
-              Given a proof and <b>h</b>, verify their validity.
-              <form action="#">
-                <div class="mdl-textfield mdl-js-textfield" id="div_verify_params">
-                  <input class="mdl-textfield__input" type="text" id="txt_verify_params" disabled>
-                  <label class="mdl-textfield__label" for="txt_verify_params">Enter <b>params</b>...</label>
-                </div>
-                <div class="mdl-textfield mdl-js-textfield" id="div_verify_proof">
-                  <input class="mdl-textfield__input" type="text" id="txt_verify_proof">
-                  <label class="mdl-textfield__label" for="txt_verify_proof">Enter <b>proof</b>...</label>
-                </div>
-                <div class="mdl-textfield mdl-js-textfield" id="div_verify_h">
-                  <input class="mdl-textfield__input" type="text" id="txt_verify_h">
-                  <label class="mdl-textfield__label" for="txt_verify_h">Enter <b>h</b>...</label>
-                </div>
-              </form>
-            </div>
-            <div class="mdl-card__actions mdl-card--border">
-              <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_verify()">
-                Verify
-              </a>
-              <div id="spinner_verify" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
-            </div>
-          </div>
-        </div>
-        <div class="mdl-cell mdl-cell--6-col">
-          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none" id="table_verify">
-            <tbody>
-              <tr id="tr_result">
-                <td class="mdl-data-table__cell--non-numeric">Result</td>
-                <td id="td_result"></td>
-              </tr>
-              <tr id="tr_verify_error">
-                <td class="mdl-data-table__cell--non-numeric">Error</td>
-                <td id="td_verify_error"></td>
-              </tr>
-
-            </tbody>
-          </table>
-        </div>
+      <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+      <div class="mdl-tabs__tab-bar">
+          <a href="#dl-panel" class="mdl-tabs__tab is-active">Discrete Log</a>
+          <a href="#tree-panel" class="mdl-tabs__tab">Merkle Tree</a>
       </div>
 
+      <div class="mdl-tabs__panel is-active" id="dl-panel">
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--3-col"></div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <a class="mdl-button mdl-js-button" style="width: 100%" target="_blank" href="https://github.com/kobigurk/wasm_proof">https://github.com/kobigurk/wasm_proof</a>
+          </div>
+          <div class="mdl-cell mdl-cell--3-col"></div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+              <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Generate keys</h2>
+              </div>
+              <div class="mdl-card__supporting-text">
+                Generate proving and verification keys for proving the knowledge of an elliptic curve discrete logarithm problem. That is, the knowledge of <b>x</b> such that $h = g^x$, in the <b>baby jubjub</b> curve.
+                The curve is $168700 * x^2 + y^2 = 1 + 168696x^2y^2$, defined over the prime field $F_p$, where $$\small{p = 218882428718392752222464057452572750885 \atop 48364400416034343698204186575808495617}$$ and $$g = \\ \mathrm{0x06cdb238b2f9c9ff32dbcca964593c5 \atop 836ddd962a12a07bb6452a598d15d3ff4,} \\ \mathrm{0x18c6409592649c36a79a15177b4aec5 \atop 784075f5a03f9a1b09a57af4b288f929d}$$.
+              </div>
+              <div class="mdl-card__actions mdl-card--border">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_generate()">
+                  Generate
+                </a>
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_generate_load()">
+                  Load from file
+                </a>
+                <input id="input_load_params" type="file" style="display: none" />
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_generate_save()" id="btn_save_to_file" style="display: none">
+                  Save to file
+                </a>
+
+                <div id="spinner_generate" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
+              </div>
+
+            </div>
+          </div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none;" id="table_generate">
+              <tbody>
+                <tr id="tr_params" style="display; none">
+                  <td class="mdl-data-table__cell--non-numeric">Params</td>
+                  <td id="td_params" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
+                  </td>
+                </tr>
+                <tr id="tr_generate_error">
+                  <td class="mdl-data-table__cell--non-numeric">Error</td>
+                  <td id="td_generate_error"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--6-col">
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+              <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Prove knowledge</h2>
+              </div>
+              <div class="mdl-card__supporting-text">
+                Prove knowledge of <b>x</b>, compute a proof string and <b>h</b>.
+                <form action="#">
+                  <div class="mdl-textfield mdl-js-textfield" id="div_prove_params">
+                    <input class="mdl-textfield__input" type="text" id="txt_prove_params" disabled>
+                    <label class="mdl-textfield__label" for="txt_prove_params">Enter <b>params</b>...</label>
+                  </div>
+
+                  <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="txt_prove_x">
+                    <label class="mdl-textfield__label" for="txt_prove_x">Enter <b>x</b> in hexadecimal...</label>
+                  </div>
+                </form>
+              </div>
+              <div class="mdl-card__actions mdl-card--border">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_prove()">
+                  Prove
+                </a>
+                <div id="spinner_prove" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none" id="table_prove">
+              <tbody>
+                <tr id="tr_h">
+                  <td class="mdl-data-table__cell--non-numeric">h</td>
+                  <td id="td_h" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;"></td>
+                </tr>
+                <tr id="tr_proof">
+                  <td class="mdl-data-table__cell--non-numeric">Proof</td>
+                  <td id="td_proof" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;"></td>
+                </tr>
+                <tr id="tr_prove_error">
+                  <td class="mdl-data-table__cell--non-numeric">Error</td>
+                  <td id="td_prove_error" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--6-col">
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+              <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Verify</h2>
+              </div>
+              <div class="mdl-card__supporting-text">
+                Given a proof and <b>h</b>, verify their validity.
+                <form action="#">
+                  <div class="mdl-textfield mdl-js-textfield" id="div_verify_params">
+                    <input class="mdl-textfield__input" type="text" id="txt_verify_params" disabled>
+                    <label class="mdl-textfield__label" for="txt_verify_params">Enter <b>params</b>...</label>
+                  </div>
+                  <div class="mdl-textfield mdl-js-textfield" id="div_verify_proof">
+                    <input class="mdl-textfield__input" type="text" id="txt_verify_proof">
+                    <label class="mdl-textfield__label" for="txt_verify_proof">Enter <b>proof</b>...</label>
+                  </div>
+                  <div class="mdl-textfield mdl-js-textfield" id="div_verify_h">
+                    <input class="mdl-textfield__input" type="text" id="txt_verify_h">
+                    <label class="mdl-textfield__label" for="txt_verify_h">Enter <b>h</b>...</label>
+                  </div>
+                </form>
+              </div>
+              <div class="mdl-card__actions mdl-card--border">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="run_verify()">
+                  Verify
+                </a>
+                <div id="spinner_verify" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none" id="table_verify">
+              <tbody>
+                <tr id="tr_result">
+                  <td class="mdl-data-table__cell--non-numeric">Result</td>
+                  <td id="td_result"></td>
+                </tr>
+                <tr id="tr_verify_error">
+                  <td class="mdl-data-table__cell--non-numeric">Error</td>
+                  <td id="td_verify_error"></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+      <div class="mdl-tabs__panel" id="tree-panel">
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--3-col"></div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <a class="mdl-button mdl-js-button" style="width: 100%" target="_blank" href="https://github.com/kobigurk/wasm_proof">https://github.com/kobigurk/wasm_proof</a>
+          </div>
+          <div class="mdl-cell mdl-cell--3-col"></div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+              <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Generate keys</h2>
+              </div>
+              <div class="mdl-card__supporting-text">
+                Generate proving and verification keys for proving membership of an element of a merkle tree.
+                The curve is $168700 * x^2 + y^2 = 1 + 168696x^2y^2$, defined over the prime field $F_p$, where $$\small{p = 218882428718392752222464057452572750885 \atop 48364400416034343698204186575808495617}$$. The hash used for the merkle tree is a pedersen hash.
+                <form action="#">
+                  <div class="mdl-textfield mdl-js-textfield" id="tree_div_depth">
+                    <input class="mdl-textfield__input" type="text" id="tree_txt_depth">
+                    <label class="mdl-textfield__label" for="tree_txt_depth">Enter <b>depth</b>...</label>
+                  </div>
+                </form>
+
+
+
+              </div>
+
+              <div class="mdl-card__actions mdl-card--border">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="tree_run_generate()">
+                  Generate
+                </a>
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="tree_run_generate_load()">
+                  Load from file
+                </a>
+                <input id="tree_input_load_params" type="file" style="display: none" />
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="tree_run_generate_save()" id="tree_btn_save_to_file" style="display: none">
+                  Save to file
+                </a>
+
+                <div id="tree_spinner_generate" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none;" id="tree_table_generate">
+              <tbody>
+                <tr id="tree_tr_params" style="display; none">
+                  <td class="mdl-data-table__cell--non-numeric">Params</td>
+                  <td id="tree_td_params" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">
+                  </td>
+                </tr>
+                <tr id="tree_tr_generate_error">
+                  <td class="mdl-data-table__cell--non-numeric">Error</td>
+                  <td id="tree_td_generate_error"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--6-col">
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+              <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Prove knowledge</h2>
+              </div>
+              <div class="mdl-card__supporting-text">
+                Prove membership of <b>x</b>, compute a proof string and <b>root</b>.
+                <form action="#">
+                  <div class="mdl-textfield mdl-js-textfield" id="tree_div_prove_params">
+                    <input class="mdl-textfield__input" type="text" id="tree_txt_prove_params" disabled>
+                    <label class="mdl-textfield__label" for="tree_txt_prove_params">Enter <b>params</b>...</label>
+                  </div>
+
+                  <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="tree_txt_prove_x">
+                    <label class="mdl-textfield__label" for="tree_txt_prove_x">Enter <b>x</b> in hexadecimal...</label>
+                  </div>
+                  <div class="mdl-textfield mdl-js-textfield" id="tree_div_prove_depth">
+                    <input class="mdl-textfield__input" type="text" id="tree_txt_prove_depth">
+                    <label class="mdl-textfield__label" for="tree_txt_prove_depth">Enter <b>depth</b>...</label>
+                  </div>
+
+                </form>
+              </div>
+              <div class="mdl-card__actions mdl-card--border">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="tree_run_prove()">
+                  Prove
+                </a>
+                <div id="tree_spinner_prove" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none" id="tree_table_prove">
+              <tbody>
+                <tr id="tree_tr_h">
+                  <td class="mdl-data-table__cell--non-numeric">Root</td>
+                  <td id="tree_td_h" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;"></td>
+                </tr>
+                <tr id="tree_tr_proof">
+                  <td class="mdl-data-table__cell--non-numeric">Proof</td>
+                  <td id="tree_td_proof" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 100px;"></td>
+                </tr>
+                <tr id="tree_tr_prove_error">
+                  <td class="mdl-data-table__cell--non-numeric">Error</td>
+                  <td id="tree_td_prove_error" style="word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--6-col">
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+              <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Verify</h2>
+              </div>
+              <div class="mdl-card__supporting-text">
+                Given a proof and <b>root</b>, verify their validity.
+                <form action="#">
+                  <div class="mdl-textfield mdl-js-textfield" id="tree_div_verify_params">
+                    <input class="mdl-textfield__input" type="text" id="tree_txt_verify_params" disabled>
+                    <label class="mdl-textfield__label" for="tree_txt_verify_params">Enter <b>params</b>...</label>
+                  </div>
+                  <div class="mdl-textfield mdl-js-textfield" id="tree_div_verify_proof">
+                    <input class="mdl-textfield__input" type="text" id="tree_txt_verify_proof">
+                    <label class="mdl-textfield__label" for="tree_txt_verify_proof">Enter <b>proof</b>...</label>
+                  </div>
+                  <div class="mdl-textfield mdl-js-textfield" id="tree_div_verify_h">
+                    <input class="mdl-textfield__input" type="text" id="tree_txt_verify_h">
+                    <label class="mdl-textfield__label" for="tree_txt_verify_h">Enter <b>root</b>...</label>
+                  </div>
+                </form>
+              </div>
+              <div class="mdl-card__actions mdl-card--border">
+                <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" onclick="tree_run_verify()">
+                  Verify
+                </a>
+                <div id="tree_spinner_verify" class="mdl-spinner mdl-js-spinner is-active" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mdl-cell mdl-cell--6-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%; display: none" id="tree_table_verify">
+              <tbody>
+                <tr id="tree_tr_result">
+                  <td class="mdl-data-table__cell--non-numeric">Result</td>
+                  <td id="tree_td_result"></td>
+                </tr>
+                <tr id="tree_tr_verify_error">
+                  <td class="mdl-data-table__cell--non-numeric">Error</td>
+                  <td id="tree_td_verify_error"></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
     </div>
   </main>
   <script type="text/x-mathjax-config">
