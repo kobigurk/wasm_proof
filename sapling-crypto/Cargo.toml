@@ -13,6 +13,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 rand = "0.4"
+rand_chacha = "0.1.1"
 digest = "0.7"
 byteorder = "1"
 ff = { path = '../ff', features = ["derive"] }

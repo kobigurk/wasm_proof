@@ -53,7 +53,7 @@ impl Stopwatch {
 }
 
 
-use rand::{XorShiftRng, SeedableRng};
+use rand::{ChaChaRng, SeedableRng};
 use ff::{BitIterator, PrimeField, PrimeFieldRepr, Field};
 use pairing::{bn256::{Bn256, Fr}};
 use sapling_crypto::{
@@ -237,9 +237,7 @@ pub fn generate_tree(seed_slice: &[u32], depth: u8) -> Result<JsValue, JsValue> 
 }
 
 fn run_generate(seed_slice: &[u32]) -> Result<KGGenerate, Box<Error>> {
-    let mut seed : [u32; 4] = [0; 4];
-    seed.copy_from_slice(seed_slice);
-    let rng = &mut XorShiftRng::from_seed(seed);
+    let rng = &mut ChaChaRng::from_seed(seed_slice);
 
     let stopwatch = Stopwatch::start();
     let j_params = &JubjubBn256::new();
@@ -263,9 +261,7 @@ fn run_generate(seed_slice: &[u32]) -> Result<KGGenerate, Box<Error>> {
 }
 
 fn run_generate_tree(seed_slice: &[u32], depth: u8) -> Result<KGGenerate, Box<Error>> {
-    let mut seed : [u32; 4] = [0; 4];
-    seed.copy_from_slice(seed_slice);
-    let rng = &mut XorShiftRng::from_seed(seed);
+    let rng = &mut ChaChaRng::from_seed(seed_slice);
 
     let stopwatch = Stopwatch::start();
     let j_params = &JubjubBn256::new();
@@ -315,9 +311,7 @@ fn run_prove(seed_slice: &[u32], params: &str, x_hex: &str) -> Result<KGProof, B
     }
     let de_params = Parameters::<Bn256>::read(&hex::decode(params)?[..], true)?;
 
-    let mut seed : [u32; 4] = [0; 4];
-    seed.copy_from_slice(seed_slice);
-    let rng = &mut XorShiftRng::from_seed(seed);
+    let rng = &mut ChaChaRng::from_seed(seed_slice);
     let params = &JubjubBn256::new();
 
     let g = params.generator(FixedGenerators::ProofGenerationKey);
@@ -364,9 +358,7 @@ fn run_prove_tree(seed_slice: &[u32], params: &str, x_hex: &str, depth: u8) -> R
     }
     let de_params = Parameters::<Bn256>::read(&hex::decode(params)?[..], true)?;
 
-    let mut seed : [u32; 4] = [0; 4];
-    seed.copy_from_slice(seed_slice);
-    let rng = &mut XorShiftRng::from_seed(seed);
+    let rng = &mut ChaChaRng::from_seed(seed_slice);
     let params = &JubjubBn256::new();
 
     let x_big = BigInt::from_str_radix(x_hex, 16)?;

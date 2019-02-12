@@ -67,7 +67,7 @@ function tree_run_prove() {
   $('#tree_spinner_prove').show();
   let params = window.params;
   let x = $('#tree_txt_prove_x').val();
-  let depth = $('#tree_txt_depth').val();
+  let depth = $('#tree_txt_prove_depth').val();
   worker.postMessage({type: 'prove', params, x, circuit: 'tree', depth});
 }
 window.tree_run_prove = tree_run_prove;

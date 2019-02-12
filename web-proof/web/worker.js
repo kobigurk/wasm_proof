@@ -12,7 +12,7 @@ onmessage = event => {
     }
     switch (event.data.type) {
       case 'generate':
-        var seed = new Uint32Array(4);
+        var seed = new Uint32Array(8);
         self.crypto.getRandomValues(seed);
 
         var gen;
@@ -28,7 +28,7 @@ onmessage = event => {
         postMessage({type: event.data.type, circuit: event.data.circuit, result: gen});
         break;
       case 'prove':
-        var seed = new Uint32Array(4);
+        var seed = new Uint32Array(8);
         self.crypto.getRandomValues(seed);
         var p;
         switch (event.data.circuit) {
