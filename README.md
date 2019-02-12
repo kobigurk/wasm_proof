@@ -9,12 +9,12 @@ Discussion: [https://community.zkproof.org/t/zksnarks-in-webassembly-running-dem
 | Discrete Log             | 1085            | i7-7500U | x86\_64   | Generate | 881                         |
 | Discrete Log             | 1085            | i7-7500U | x86\_64   | Prove    | 169                         |
 | Discrete Log             | 1085            | i7-7500U | x86\_64   | Verify   | 5                           |
-| Merkle Tree (depth 32)   | 44193           | i7-7500U | x86\_64   | Generate | 7966                        |
+| Merkle Tree (depth 32)   | 44193           | i7-7500U | x86\_64   | Generate | 6949                        |
 | Merkle Tree (depth 32)   | 44193           | i7-7500U | x86\_64   | Prove    | 831                         |
 | Merkle Tree (depth 32)   | 44193           | i7-7500U | x86\_64   | Verify   | 5                           |
 | Discrete Log             | 1085            | i7-7500U | WASM      | Generate | 3785                        |
 | Discrete Log             | 1085            | i7-7500U | WASM      | Prove    | 606                         |
 | Discrete Log             | 1085            | i7-7500U | WASM      | Verify   | 16                          |
-| Merkle Tree (depth 32)   | 44193           | i7-7500U | WASM      | Generate | 158754                      |
-| Merkle Tree (depth 32)   | 44193           | i7-7500U | WASM      | Prove    | 18037                       |
+| Merkle Tree (depth 32)   | 44193           | i7-7500U | WASM      | Generate | 130047                      |
+| Merkle Tree (depth 32)   | 44193           | i7-7500U | WASM      | Prove    | 14926                       |
 | Merkle Tree (depth 32)   | 44193           | i7-7500U | WASM      | Verify   | 16                          |
