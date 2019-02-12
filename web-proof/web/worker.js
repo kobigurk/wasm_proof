@@ -15,17 +15,45 @@ onmessage = event => {
         var seed = new Uint32Array(4);
         self.crypto.getRandomValues(seed);
 
-        var gen = js.generate(seed);
+        var gen;
+        switch (event.data.circuit) {
+          case 'dl':
+            gen = js.generate(seed);
+            break;
+          case 'tree':
+            gen = js.generate_tree(seed, event.data.depth);
+            break;
+
+        }
         postMessage({type: event.data.type, circuit: event.data.circuit, result: gen});
         break;
       case 'prove':
         var seed = new Uint32Array(4);
         self.crypto.getRandomValues(seed);
-        var p = js.prove(seed, event.data.params, event.data.x);
+        var p;
+        switch (event.data.circuit) {
+          case 'dl':
+            p = js.prove(seed, event.data.params, event.data.x);
+            break;
+          case 'tree':
+            p = js.prove_tree(seed, event.data.params, event.data.x, event.data.depth);
+            break;
+
+        }
         postMessage({type: event.data.type, circuit: event.data.circuit, result: p});
         break;
       case 'verify':
-        var v = js.verify(event.data.params, event.data.proof, event.data.h);
+        var v;
+        switch (event.data.circuit) {
+          case 'dl':
+            v = js.verify(event.data.params, event.data.proof, event.data.h);
+            break;
+
+          case 'tree':
+            v = js.verify_tree(event.data.params, event.data.proof, event.data.h);
+            break;
+        }
+
         postMessage({type: event.data.type, circuit: event.data.circuit, result: v});
         break;
     }

@@ -9,7 +9,8 @@ window.run_generate = run_generate;
 
 function tree_run_generate() {
   $('#tree_spinner_generate').show();
-  worker.postMessage({type: 'generate', circuit: 'tree'});
+  let depth = $('#tree_txt_depth').val();
+  worker.postMessage({type: 'generate', circuit: 'tree', depth});
 }
 
 window.tree_run_generate = tree_run_generate;
@@ -19,7 +20,7 @@ function run_generate_save() {
   var text = window.params;
   $link
     .attr( "download", "dl.zkp" )
-    .attr( "href", "data:application/octet-stream," + text )
+    .attr( "href", URL.createObjectURL(new Blob([text], {type: 'data:application/octet-stream'})))
     .appendTo( "body" )
     .get(0)
     .click();
@@ -32,7 +33,7 @@ function tree_run_generate_save() {
   var text = window.params;
   $link
     .attr( "download", "tree.zkp" )
-    .attr( "href", "data:application/octet-stream," + text )
+    .attr( "href", URL.createObjectURL(new Blob([text], {type: 'data:application/octet-stream'})))
     .appendTo( "body" )
     .get(0)
     .click();
@@ -66,7 +67,8 @@ function tree_run_prove() {
   $('#tree_spinner_prove').show();
   let params = window.params;
   let x = $('#tree_txt_prove_x').val();
-  worker.postMessage({type: 'prove', params, x, circuit: 'tree'});
+  let depth = $('#tree_txt_depth').val();
+  worker.postMessage({type: 'prove', params, x, circuit: 'tree', depth});
 }
 window.tree_run_prove = tree_run_prove;
 
@@ -120,6 +122,10 @@ let eventHandler = function(event) {
         $('#' + pref + 'txt_prove_params').val('Loaded from memory');
         $('#' + pref + 'div_verify_params').addClass('is-dirty');
         $('#' + pref + 'txt_verify_params').val('Loaded from memory');
+        if (event.data.circuit == 'tree') {
+          $('#' + pref + 'div_prove_depth').addClass('is-dirty');
+          $('#' + pref + 'txt_prove_depth').val($('#' + pref + 'txt_depth').val());
+        }
         $('#' + pref + 'tr_generate_error').hide();
         console.log('generate time elapsed: ' + gen.millis);
       }
@@ -162,7 +168,7 @@ let eventHandler = function(event) {
         $('#' + pref + 'tr_result').show();
         $('#' + pref + 'td_result').text(v.result);
         $('#' + pref + 'tr_verify_error').hide();
-        console.log('prove time elapsed: ' + v.millis);
+        console.log('verify time elapsed: ' + v.millis);
       }
       $('#' + pref + 'table_verify').show();
       break;
