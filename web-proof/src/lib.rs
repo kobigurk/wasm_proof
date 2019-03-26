@@ -1,5 +1,3 @@
-#![feature(duration_as_u128)]
-
 extern crate sapling_crypto;
 extern crate wasm_bindgen;
 extern crate bellman;
@@ -486,15 +484,21 @@ mod test {
             JubjubBn256,
             FixedGenerators,
             JubjubParams,
+            JubjubEngine,
         }
     };
     use sapling_crypto::circuit::test::TestConstraintSystem;
     use bellman::{
+        ConstraintSystem,
         Circuit,
+        SynthesisError,
+        LinearCombination,
     };
 
     use super::{DiscreteLogCircuit, TreeCircuit};
     use std::fs;
+
+    use ff::{Field, PrimeField};
 
     #[test]
     fn print_g() {
@@ -597,5 +601,41 @@ mod test {
         assert_eq!(verify.result, true);
         println!("verify: {}", verify.result);
         println!("verify tree time elapsed: {}", verify.millis);
+    }
+
+    struct ImportCircuit {
+    }
+
+    impl<E: JubjubEngine> Circuit<E> for ImportCircuit {
+        fn synthesize<CS: ConstraintSystem<E>>(
+            self,
+            cs: &mut CS
+        ) -> Result<(), SynthesisError>
+        {
+            // TODO: replace this with read from file
+            let a = LinearCombination::<E>::zero();
+            let b = LinearCombination::<E>::zero();
+            let c = LinearCombination::<E>::zero();
+            let v = cs.alloc(|| format!("v{}", 0), || Ok(E::Fr::zero())).unwrap();
+            let p = cs.alloc_input(|| format!("p{}", 1), || Ok(E::Fr::zero())).unwrap();
+            let a = a + (E::Fr::from_repr(8.into()).unwrap(), v);
+            //let a = a + (E::Fr::from_repr(<pairing::bn256::Fr as PrimeField>::Repr::from(0)).unwrap(), v);
+            let b = b + p;
+            println!("v: {:?}", v);
+            println!("p: {:?}", p);
+            // manully insert the linear combination
+            cs.enforce(|| "test", |_| a, |_| b, |_| c);
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn test_manual_constraint_system() {
+        let mut cs = TestConstraintSystem::<Bn256>::new();
+        let ic = ImportCircuit {
+        };
+
+        ic.synthesize(&mut cs).unwrap();
+        println!("{}", cs.pretty_print());
     }
 }
